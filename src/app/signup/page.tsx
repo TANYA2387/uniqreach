@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation, Language } from "@/lib/i18n";
@@ -14,7 +14,7 @@ import {
   ShieldCheck 
 } from "lucide-react";
 
-export default function SignUpPage() {
+function SignUpContent() {
   const { t, language, setLanguage } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -280,5 +280,13 @@ export default function SignUpPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-slate-500 text-sm">Loading...</div>}>
+      <SignUpContent />
+    </Suspense>
   );
 }
