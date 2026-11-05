@@ -1,257 +1,170 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
-import { useTranslation, Language } from "@/lib/i18n";
-import { createClient } from "@/lib/supabase/client";
+import { usePathname } from "next/navigation";
 import { 
-  Globe, 
   Sparkles, 
-  LayoutDashboard, 
   Briefcase, 
+  UserCheck, 
+  ShieldAlert, 
+  Globe, 
+  ChevronDown, 
+  Layers, 
+  CheckCircle2, 
   Compass, 
-  MessageSquare, 
-  LogOut, 
-  User, 
-  ShieldCheck 
+  MessageSquare,
+  Lock
 } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 export default function Navbar() {
-  const { t, language, setLanguage } = useTranslation();
-  const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<any>(null);
-  const [role, setRole] = useState<string | null>(null);
+  const { t, language, setLanguage } = useTranslation();
+  const [activePersona, setActivePersona] = useState("Brand Owner");
+  const [showPersonaMenu, setShowPersonaMenu] = useState(false);
 
-  useEffect(() => {
-    const supabase = createClient();
-    async function fetchSession() {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          setUser(session.user);
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("role")
-            .eq("id", session.user.id)
-            .single();
-          if (profile) setRole(profile.role);
-        }
-      } catch (err) {
-        console.warn("Auth session check skipped:", err);
-      }
-    }
-    fetchSession();
-
-    let authSubscription: any = null;
-    try {
-      const { data: authListener } = supabase.auth.onAuthStateChange(
-        (event, session) => {
-          if (session?.user) {
-            setUser(session.user);
-          } else {
-            setUser(null);
-            setRole(null);
-          }
-        }
-      );
-      authSubscription = authListener?.subscription;
-    } catch (err) {
-      console.warn("Auth listener skipped:", err);
-    }
-
-    return () => {
-      if (authSubscription) {
-        authSubscription.unsubscribe();
-      }
-    };
-  }, []);
-
-  const handleSignOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    setUser(null);
-    setRole(null);
-    router.push("/login");
-  };
-
-  const getDashboardHref = () => {
-    if (role === "brand") return "/dashboard/brand";
-    if (role === "creator") return "/dashboard/creator";
-    if (role === "admin") return "/dashboard/admin";
-    return "/dashboard/brand";
-  };
+  const personas = [
+    { name: "Brand Owner (Pilgrim D2C)", role: "brand", sub: "Full budget & deposit rights" },
+    { name: "Brand Approver (Creative Lead)", role: "brand_approver", sub: "Review & revision rights only" },
+    { name: "Creator (Priya Sharma)", role: "creator", sub: "85K Followers • Verified KYC" },
+    { name: "Admin (Signatory / Maker)", role: "admin", sub: "Ledger & Maker-Checker" },
+  ];
 
   return (
-    <header className="sticky top-0 z-50 glass-panel border-b border-slate-200/80">
+    <header className="sticky top-0 z-50 bg-[#0B0F17]/90 backdrop-blur-md border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo & Tagline */}
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-creator-500 flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
+          
+          {/* Logo & Platform Tagline */}
+          <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform">
                 <Sparkles className="w-5 h-5" />
               </div>
               <div className="flex flex-col">
-                <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-slate-900 to-brand-700 bg-clip-text text-transparent">
-                  {t("app_name")}
-                </span>
-                <span className="text-[10px] text-slate-500 hidden sm:inline -mt-1 font-medium">
-                  {t("tagline")}
+                <div className="flex items-center gap-2">
+                  <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent">
+                    GrowOS
+                  </span>
+                  <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    INDIA D2C
+                  </span>
+                </div>
+                <span className="text-[10px] text-slate-400 font-medium tracking-wide">
+                  Creator Intelligence & Marketing OS
                 </span>
               </div>
             </Link>
           </div>
 
-          {/* Navigation Links for Authenticated Users */}
-          {user && (
-            <nav className="hidden md:flex items-center gap-1">
-              <Link
-                href={getDashboardHref()}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  pathname.startsWith("/dashboard")
-                    ? "bg-brand-50 text-brand-700"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-                }`}
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                {t("nav.dashboard")}
-              </Link>
-
-              {role === "brand" && (
-                <>
-                  <Link
-                    href="/explore"
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-                  >
-                    <Compass className="w-4 h-4" />
-                    {t("nav.explore_creators")}
-                  </Link>
-                  <Link
-                    href="/campaigns/create"
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-                  >
-                    <Briefcase className="w-4 h-4" />
-                    {t("nav.create_campaign")}
-                  </Link>
-                </>
-              )}
-
-              {role === "creator" && (
-                <Link
-                  href="/campaigns"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-                >
-                  <Briefcase className="w-4 h-4" />
-                  {t("nav.explore_campaigns")}
-                </Link>
-              )}
-
-              <Link
-                href="/messages"
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-              >
-                <MessageSquare className="w-4 h-4" />
-                {t("nav.messages")}
-              </Link>
-            </nav>
-          )}
-
-          {/* Fast Workspace Nav */}
-          <div className="hidden lg:flex items-center gap-1.5 bg-slate-100/80 p-1 rounded-xl border border-slate-200">
+          {/* Three Portals Selector */}
+          <nav className="hidden md:flex items-center gap-1.5 p-1 rounded-xl bg-slate-900/90 border border-white/10">
             <Link
-              href="/dashboard/creator"
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                pathname.startsWith("/dashboard/creator")
-                  ? "bg-white text-creator-700 shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
+              href="/brand/dashboard"
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                pathname.startsWith("/brand")
+                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/20"
+                  : "text-slate-300 hover:text-white hover:bg-white/5"
               }`}
             >
-              Creator Portal
+              <Briefcase className="w-3.5 h-3.5" />
+              <span>Brand Portal</span>
             </Link>
-            <Link
-              href="/dashboard/brand"
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                pathname.startsWith("/dashboard/brand")
-                  ? "bg-white text-brand-700 shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Brand Portal
-            </Link>
-            <Link
-              href="/dashboard/admin"
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                pathname.startsWith("/dashboard/admin")
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Admin
-            </Link>
-          </div>
 
-          {/* Right Controls: Language Selector & Auth */}
+            <Link
+              href="/creator/dashboard"
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                pathname.startsWith("/creator")
+                  ? "bg-pink-600 text-white shadow-md shadow-pink-500/20"
+                  : "text-slate-300 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <UserCheck className="w-3.5 h-3.5" />
+              <span>Creator Portal</span>
+            </Link>
+
+            <Link
+              href="/admin/dashboard"
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                pathname.startsWith("/admin")
+                  ? "bg-amber-600 text-white shadow-md shadow-amber-500/20"
+                  : "text-slate-300 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <ShieldAlert className="w-3.5 h-3.5" />
+              <span>Admin Center</span>
+            </Link>
+          </nav>
+
+          {/* Right Controls: Persona Switcher, Language & Status */}
           <div className="flex items-center gap-3">
-            {/* Language Switcher */}
-            <div className="flex items-center bg-slate-100/90 rounded-lg p-1 border border-slate-200">
-              <Globe className="w-3.5 h-3.5 text-slate-500 ml-1.5 mr-1" />
+            
+            {/* Quick Demo Persona Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowPersonaMenu(!showPersonaMenu)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-slate-200 hover:bg-white/10 transition-colors"
+              >
+                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="font-medium text-slate-300 hidden lg:inline">Active Persona:</span>
+                <span className="font-semibold text-white">{activePersona}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              </button>
+
+              {showPersonaMenu && (
+                <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-slate-900 border border-white/10 shadow-2xl p-2 z-50">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-3 py-1.5">
+                    Switch Test Persona
+                  </div>
+                  {personas.map((p) => (
+                    <button
+                      key={p.name}
+                      onClick={() => {
+                        setActivePersona(p.name);
+                        setShowPersonaMenu(false);
+                      }}
+                      className="w-full text-left p-2.5 rounded-xl hover:bg-white/5 transition-colors flex items-start justify-between"
+                    >
+                      <div>
+                        <div className="text-xs font-semibold text-white">{p.name}</div>
+                        <div className="text-[10px] text-slate-400">{p.sub}</div>
+                      </div>
+                      {activePersona === p.name && (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Language Selector */}
+            <div className="flex items-center bg-white/5 rounded-xl p-1 border border-white/10">
               <button
                 onClick={() => setLanguage("en")}
-                className={`px-2 py-1 text-xs font-semibold rounded-md transition-all ${
+                className={`px-2 py-1 text-xs font-semibold rounded-lg transition-all ${
                   language === "en"
-                    ? "bg-white text-slate-900 shadow-sm"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-indigo-600 text-white"
+                    : "text-slate-400 hover:text-white"
                 }`}
               >
                 EN
               </button>
               <button
                 onClick={() => setLanguage("hi")}
-                className={`px-2 py-1 text-xs font-semibold rounded-md transition-all ${
+                className={`px-2 py-1 text-xs font-semibold rounded-lg transition-all ${
                   language === "hi"
-                    ? "bg-white text-brand-700 shadow-sm"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-indigo-600 text-white"
+                    : "text-slate-400 hover:text-white"
                 }`}
               >
                 हिन्दी
               </button>
             </div>
 
-            {/* Auth Buttons */}
-            {user ? (
-              <div className="flex items-center gap-2">
-                {role && (
-                  <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-indigo-100 text-indigo-800 border border-indigo-200">
-                    {t(`roles.${role}`)}
-                  </span>
-                )}
-                <button
-                  onClick={handleSignOut}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 border border-slate-200 transition-colors"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span>{t("nav.logout")}</span>
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/login"
-                  className="px-3.5 py-1.5 rounded-lg text-sm font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-                >
-                  {t("nav.login")}
-                </Link>
-                <Link
-                  href="/signup"
-                  className="px-4 py-1.5 rounded-lg text-sm font-medium text-white bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 shadow-sm transition-all"
-                >
-                  {t("nav.signup")}
-                </Link>
-              </div>
-            )}
           </div>
+
         </div>
       </div>
     </header>
