@@ -167,6 +167,59 @@ export default function Navbar() {
 
         </div>
       </div>
+
+      {/* Mobile & Tablet Fixed Bottom Navigation Bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0B0F17]/95 border-t border-white/10 backdrop-blur-xl px-2 py-2">
+        <div className="grid grid-cols-4 gap-1">
+          <Link
+            href="/brand/dashboard"
+            className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[10px] font-semibold transition-all ${
+              pathname.startsWith("/brand")
+                ? "bg-indigo-600/30 text-indigo-400 border border-indigo-500/40"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            <Briefcase className="w-4 h-4 mb-0.5" />
+            <span>Brand</span>
+          </Link>
+
+          <Link
+            href="/creator/dashboard"
+            className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[10px] font-semibold transition-all ${
+              pathname.startsWith("/creator")
+                ? "bg-pink-600/30 text-pink-400 border border-pink-500/40"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            <UserCheck className="w-4 h-4 mb-0.5" />
+            <span>Creator</span>
+          </Link>
+
+          <Link
+            href="/admin/dashboard"
+            className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[10px] font-semibold transition-all ${
+              pathname.startsWith("/admin")
+                ? "bg-amber-600/30 text-amber-400 border border-amber-500/40"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            <ShieldAlert className="w-4 h-4 mb-0.5" />
+            <span>Admin</span>
+          </Link>
+
+          <Link
+            href="/brand/campaigns/create"
+            className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[10px] font-semibold transition-all ${
+              pathname.startsWith("/brand/campaigns/create")
+                ? "bg-emerald-600/30 text-emerald-400 border border-emerald-500/40"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            <Sparkles className="w-4 h-4 mb-0.5" />
+            <span>AI Brief</span>
+          </Link>
+        </div>
+      </div>
     </header>
   );
 }

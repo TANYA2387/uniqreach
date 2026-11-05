@@ -7,9 +7,9 @@ import Navbar from "@/components/Navbar";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "UniqReach - AI-Powered Brand & Creator Marketplace",
+  title: "GrowOS - Creator Intelligence & Influencer Marketing OS",
   description:
-    "One Campaign. One Selected Creator. The Right Audience. Discover authentic creators with unique audiences using AI matching.",
+    "AI-powered creator intelligence and influencer marketing marketplace for India (Fashion, Beauty, Skincare, Lifestyle).",
 };
 
 export default function RootLayout({
@@ -19,10 +19,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} min-h-screen flex flex-col`}>
+      <body className={`${inter.className} min-h-screen flex flex-col bg-[#0B0F17] text-slate-100`}>
         <I18nProvider>
           <Navbar />
-          <main className="flex-1">{children}</main>
+          <main className="flex-1 pb-20 md:pb-0">{children}</main>
         </I18nProvider>
       </body>
     </html>
